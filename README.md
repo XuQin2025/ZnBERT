@@ -1,5 +1,126 @@
-# ZnBERT: Domain-Adaptive BERT for Zinc Alloy Literature
-ZnBERT is a domain-adapted language model tailored for zinc alloy research. Starting from a general-purpose BERT backbone, we perform continued masked-language-model (MLM) pretraining on a curated corpus of Zn-alloy abstracts. The goal is to learn Zn-specific terminology and composition/processing expressions (e.g., alloying elements, deformation routes, temperatures, reductions, ECAP passes), enabling stronger text representations for downstream tasks such as predicting mechanical properties (UTS/YS/EL), extracting composition–processing descriptors, and supporting data-driven alloy design.
+**ZnBERT-guided design of Zn alloys with optimized mechanical performance for biomedical applications **
 
 
-The full ZnBERT please to see in：https://huggingface.co/XuQin/ZnBERT
+The downstream workflow applies attention-mask-aware mean pooling to obtain one 768-dimensional representation per input text:
+
+```python
+import torch
+from transformers import AutoModel, AutoTokenizer
+
+model_id = "XuQin/ZnBERT"
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModel.from_pretrained(model_id).eval()
+
+texts = [
+    "Zn-based alloy with 0.25 wt% Mg, 0.2 wt% Li, and 2.3 wt% Cu. "
+    "Extrusion T=260 C; AR=20."
+]
+
+batch = tokenizer(
+    texts,
+    padding=True,
+    truncation=True,
+    max_length=512,
+    return_tensors="pt",
+)
+
+with torch.no_grad():
+    hidden = model(**batch).last_hidden_state
+    mask = batch["attention_mask"].unsqueeze(-1).to(hidden.dtype)
+    embeddings = (hidden * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-9)
+
+print(embeddings.shape)  # (1, 768)
+```
+
+## Example analyses
+
+Run scripts from the repository root so that relative paths resolve consistently.
+
+Compare downstream models:
+
+```bash
+python scripts/stage02_compare_downstream_models_v2.py
+```
+
+Calculate XGBoost SHAP importance:
+
+```bash
+python scripts/stage03_xgb_shap_importance.py
+```
+
+Test whether ZnBERT uses linguistic context and word order:
+
+```bash
+python scripts/stage04_semantic_order_ablation.py
+python scripts/stage04_protected_phrase_shuffle.py
+python scripts/stage04_xgb_feature_order_shuffle.py
+```
+
+Perform CPI-based screening:
+
+```bash
+python scripts/stage05_rank_cpi_and_plot.py
+```
+
+Estimate predictive uncertainty:
+
+```bash
+python scripts/stage06_cv_uncertainty.py
+python scripts/stage06_calibrate_expert_uncertainty.py
+```
+
+Before running an analysis, review the paths and experiment settings near the beginning of the corresponding script. Some analyses are computationally intensive and cache embeddings to avoid repeated encoder inference.
+
+## Semantic robustness analysis
+
+Conventional tabular machine-learning models are invariant to the physical order of feature columns when the model is retrained with the same feature–value mapping. Language encoders, however, can respond to changes in token order because self-attention generates contextual representations.
+
+The stage-4 experiments distinguish among:
+
+1. the original composition–processing sentence;
+2. complete token shuffling;
+3. protected-phrase shuffling, which keeps physically meaningful units such as `0.25 wt% Mg`, `Extrusion T=260 C`, and `AR=20` intact;
+4. structured XGBoost feature-column shuffling as a control.
+
+This design tests whether ZnBERT's predictive contribution arises only from the presence of numerical and chemical tokens or also from their contextual organization.
+
+## CPI-based alloy screening
+
+Candidate alloys are ranked using a comprehensive performance index:
+
+```text
+CPI = UTS_norm + YS_norm + EL_norm
+```
+
+The screening scripts combine model predictions with composition/process constraints and expert feasibility assessment. Model-ranked candidates should always be validated experimentally before biomedical interpretation or application.
+
+## Uncertainty
+
+The uncertainty workflow extracts predictions from individual estimators/trees in the selected ensemble, calculates their dispersion, and calibrates the resulting standard deviation against cross-validated residuals. Results can be reported as:
+
+```text
+prediction ± calibrated 1σ (95% confidence interval)
+```
+
+The calibrated intervals quantify model uncertainty under the implemented validation setting; they do not replace experimental error analysis or guarantee reliability outside the training domain.
+
+## Data and model limitations
+
+- ZnBERT is an encoder and masked-language model, not a generative chatbot.
+- The pretrained checkpoint alone does not directly output UTS, YS, or EL; property prediction requires the downstream preprocessing and regression pipeline.
+- Results may be sensitive to text formatting, numerical representation, and composition/process domains not covered by the training corpus.
+- Literature-derived data may contain reporting heterogeneity, extraction errors, and uneven coverage of alloy families and processing routes.
+- Predictions are intended for research prioritization and require experimental validation, especially for biomedical materials.
+- Users should independently verify the licences and redistribution conditions of source literature and derived corpora.
+
+## Citation
+
+The associated manuscript is in preparation:
+
+> ZnBERT-guided design of Zn alloys with optimized mechanical performance for biomedical applications
+
+Until the article is available, please cite this GitHub repository and the [ZnBERT model repository on Hugging Face](https://huggingface.co/XuQin/ZnBERT).
+
+## License
+
+This repository is released under the [MIT License](LICENSE). Third-party datasets, literature records, pretrained backbones, and model artefacts may be subject to their own terms.
