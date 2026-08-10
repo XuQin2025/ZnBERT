@@ -3,34 +3,6 @@
 
 The complete pretrained ZnBERT is hosted at Hugging Face: https://huggingface.co/XuQin/ZnBERT.
 
-```python
-import torch
-from transformers import AutoModel, AutoTokenizer
-
-model_id = "XuQin/ZnBERT"
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModel.from_pretrained(model_id).eval()
-
-texts = [
-    "Zn-based alloy with 0.25 wt% Mg, 0.2 wt% Li, and 2.3 wt% Cu. "
-    "Extrusion T=260 C; AR=20."
-]
-
-batch = tokenizer(
-    texts,
-    padding=True,
-    truncation=True,
-    max_length=512,
-    return_tensors="pt",
-)
-
-with torch.no_grad():
-    hidden = model(**batch).last_hidden_state
-    mask = batch["attention_mask"].unsqueeze(-1).to(hidden.dtype)
-    embeddings = (hidden * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-9)
-
-print(embeddings.shape)  # (1, 768)
-```
 
 ## Example analyses
 
