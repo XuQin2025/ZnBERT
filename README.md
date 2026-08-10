@@ -1,6 +1,8 @@
 ## ZnBERT-guided design of Zn alloys with optimized mechanical performance for biomedical applications
 
 ZnBERT is a BERT-family encoder adapted to zinc-alloy literature by masked-language-model domain-adaptive pretraining. It is intended to encode composition–processing descriptions for materials informatics tasks. In the authors' downstream workflow, mean-pooled ZnBERT embeddings are combined with structured alloy/process descriptors and an XGBoost regressor to predict ultimate tensile strength (UTS), yield strength (YS), and elongation (EL).
+
+
 The complete pretrained ZnBERT is hosted at Hugging Face: https://huggingface.co/XuQin/ZnBERT.
 
 
