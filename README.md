@@ -1,7 +1,7 @@
 ## ZnBERT-guided design of Zn alloys with optimized mechanical performance for biomedical applications
 
 
-The downstream workflow applies attention-mask-aware mean pooling to obtain one 768-dimensional representation per input text:
+The complete pretrained ZnBERT is hosted at Hugging Face: https://huggingface.co/XuQin/ZnBERT.
 
 ```python
 import torch
@@ -104,23 +104,9 @@ prediction ± calibrated 1σ (95% confidence interval)
 
 The calibrated intervals quantify model uncertainty under the implemented validation setting; they do not replace experimental error analysis or guarantee reliability outside the training domain.
 
-## Data and model limitations
-
-- ZnBERT is an encoder and masked-language model, not a generative chatbot.
-- The pretrained checkpoint alone does not directly output UTS, YS, or EL; property prediction requires the downstream preprocessing and regression pipeline.
-- Results may be sensitive to text formatting, numerical representation, and composition/process domains not covered by the training corpus.
-- Literature-derived data may contain reporting heterogeneity, extraction errors, and uneven coverage of alloy families and processing routes.
-- Predictions are intended for research prioritization and require experimental validation, especially for biomedical materials.
-- Users should independently verify the licences and redistribution conditions of source literature and derived corpora.
 
 ## Citation
 
 The associated manuscript is in preparation:
 
-> ZnBERT-guided design of Zn alloys with optimized mechanical performance for biomedical applications
 
-Until the article is available, please cite this GitHub repository and the [ZnBERT model repository on Hugging Face](https://huggingface.co/XuQin/ZnBERT).
-
-## License
-
-This repository is released under the [MIT License](LICENSE). Third-party datasets, literature records, pretrained backbones, and model artefacts may be subject to their own terms.
