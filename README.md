@@ -1,4 +1,4 @@
-**ZnBERT-guided design of Zn alloys with optimized mechanical performance for biomedical applications **
+## ZnBERT-guided design of Zn alloys with optimized mechanical performance for biomedical applications
 
 
 The downstream workflow applies attention-mask-aware mean pooling to obtain one 768-dimensional representation per input text:
