@@ -1,0 +1,15 @@
+numpy
+pandas
+openpyxl
+matplotlib
+seaborn
+scikit-learn
+xgboost
+torch
+transformers
+datasets
+accelerate
+shap
+scipy
+joblib
+
