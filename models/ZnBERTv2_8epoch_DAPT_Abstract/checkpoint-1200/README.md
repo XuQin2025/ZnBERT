@@ -1,0 +1,2 @@
+The complete pretrained ZnBERT is hosted at Hugging Face:
+https://huggingface.co/XuQin/ZnBERT.
